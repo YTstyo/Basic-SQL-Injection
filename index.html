@@ -16,6 +16,7 @@
             <button type="submit">Submit</button>
         </form>
 
+        <!-- Display the search result -->
         <div class="result">
             <h2>Your Search Term:</h2>
             <p id="display-result"></p>
@@ -23,11 +24,18 @@
     </div>
 
     <script>
+        // Get the search parameter from the URL
         const params = new URLSearchParams(window.location.search);
         const searchTerm = params.get('search');
 
+        // Display the search term directly, without sanitizing it
         if (searchTerm) {
-            document.getElementById('display-result').innerHTML = searchTerm;
+            // Use textContent to avoid XSS
+            document.getElementById('display-result').textContent = searchTerm;
+
+            // If you want to directly inject HTML and see the XSS
+            // Uncomment the line below and comment the above line
+            // document.getElementById('display-result').innerHTML = searchTerm;
         }
     </script>
 </body>
