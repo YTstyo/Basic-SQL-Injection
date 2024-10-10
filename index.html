@@ -3,40 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vulnerable XSS Site</title>
+    <title>JWT Cookie Confusion Vulnerability</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsonwebtoken@8.5.1/index.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Simple Search Page</h1>
-        <p>Enter a search term and see it displayed below:</p>
-        <form action="index.html" method="GET">
-            <label for="search">Search:</label>
-            <input type="text" id="search" name="search" required>
-            <button type="submit">Submit</button>
-        </form>
-
-        <!-- Display the search result -->
-        <div class="result">
-            <h2>Your Search Term:</h2>
-            <p id="display-result"></p>
-        </div>
+        <h1>JWT Cookie Confusion Example</h1>
+        <p id="status">Not logged in</p>
+        <button id="loginButton">Log In</button>
+        <button id="getUserDataButton" style="display:none;">Get User Data</button>
+        <div id="userData" style="display:none;"></div>
     </div>
 
     <script>
-        // Get the search parameter from the URL
-        const params = new URLSearchParams(window.location.search);
-        const searchTerm = params.get('search');
+        const SECRET_KEY = "supersecretkey";
+        let token = '';
 
-        // Display the search term directly, without sanitizing it
-        if (searchTerm) {
-            // Use textContent to avoid XSS
-            document.getElementById('display-result').textContent = searchTerm;
+        document.getElementById('loginButton').addEventListener('click', () => {
+            const payload = {
+                user: "user123",
+                role: "user"
+            };
+            token = jsonwebtoken.sign(payload, SECRET_KEY);
+            document.cookie = `jwt=${token}; path=/; HttpOnly`;
+            document.getElementById('status').textContent = "Logged in as user123";
+            document.getElementById('loginButton').style.display = 'none';
+            document.getElementById('getUserDataButton').style.display = 'inline';
+        });
 
-            // If you want to directly inject HTML and see the XSS
-            // Uncomment the line below and comment the above line
-            // document.getElementById('display-result').innerHTML = searchTerm;
-        }
+        document.getElementById('getUserDataButton').addEventListener('click', () => {
+            const userDataDiv = document.getElementById('userData');
+            const cookies = document.cookie.split('; ').reduce((prev, current) => {
+                const [name, value] = current.split('=');
+                prev[name] = value;
+                return prev;
+            }, {});
+
+            const jwt = cookies.jwt;
+            if (jwt) {
+                const decoded = jsonwebtoken.verify(jwt, SECRET_KEY);
+                userDataDiv.textContent = `User Data: ${JSON.stringify(decoded)}`;
+                userDataDiv.style.display = 'block';
+            } else {
+                userDataDiv.textContent = "No user data available.";
+                userDataDiv.style.display = 'block';
+            }
+        });
     </script>
 </body>
 </html>
