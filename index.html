@@ -3,20 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vulnerable Site</title>
+    <title>Vulnerable XSS Site</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Vulnerable Login Page</h1>
-        <form id="loginForm" action="/login" method="POST">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-            <button type="submit">Login</button>
+        <h1>Simple Search Page</h1>
+        <p>Enter a search term and see it displayed below:</p>
+        <form action="index.html" method="GET">
+            <label for="search">Search:</label>
+            <input type="text" id="search" name="search" required>
+            <button type="submit">Submit</button>
         </form>
+
+        <div class="result">
+            <h2>Your Search Term:</h2>
+            <p id="display-result"></p>
+        </div>
     </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const searchTerm = params.get('search');
+
+        if (searchTerm) {
+            document.getElementById('display-result').innerHTML = searchTerm;
+        }
+    </script>
 </body>
-<script src="app.js"></script>
 </html>
